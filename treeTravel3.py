@@ -51,10 +51,9 @@ def travel(tree):
         #Here is where I assign children (set children to BigList)
         #print("children:",BigList,'\n')
         return BigList, SmallStr
-        for x in BigList:
-            travel(x)
-    
-    
+        #for x in BigList:
+           # travel(x)
+
             
 
 
@@ -62,19 +61,28 @@ def travel(tree):
 
 class Node:
     
-    children=[]
-    allTips=[]
-    node=""
-    IntLabel=""
-    allNodes=[]
 
-    def __init__(self, node):
+
+
+    def __init__(self, node, parent=None):
         self.node=node
+        self.parent=parent
+
+        self.children=None
+        self.allTips=[]
+        self.intLabel="" #I don't really know what is going on with this, but I think this is going to store internal label info, e.g., BS and BL
+        self.allNodes=[]
+
+        self.sister=[]
+        self.taxaName=None
+        self.branchLength=None
+
+
         try:
-            self.children, self.IntLabel=self.get_children()
+            self.children, self.intLabel=self.get_children()
         except TypeError:
             self.children=None
-            self.IntLabel=None
+            self.intLabel=None
 
     def get_children(self):
 
@@ -82,40 +90,144 @@ class Node:
         
     
     def get_tips(self):
+        '''
+        Find all tips. Lowkey sucked ass to make. Need to assign the tips all the way up.
+        '''
+
         
-        if len(self.children) != 0:
+        if len(self.children) != None:
+
             for x in self.children:
-                
+
                 tmp=Node(x)
                 
                 if tmp.children == None:
-                    self.allTips.append(x)
+                    print(x)
+                    self.allTips.append(x) #Depending on where you are in the tree strucutre, self is going to be either tmp or it is going to be the original Node.
+                    
                 else:
-                    tmp.get_tips()
+                    tmp.get_tips() #at this point, self now becomes tmp.
+
+                self.allTips.extend(tmp.allTips) #If self from the first comment was tmp, then we need to keep bringing alltips up through the ranks until it reaches the top.
+
+        
 
     def get_allNodes(self):
-        if len(self.children) != 0:
+        '''
+        Conceptually, this is the same as get_tips, but you appending at a different point.
+        '''
+
+        if len(self.children) != None:
+
             for x in self.children:
+
                 tmp=Node(x)
+
                 if tmp.children == None:
                     pass
+
                 else:
                     self.allNodes.append(x)
                     tmp.get_allNodes()
 
-a=Node(tree)
+                self.allNodes.extend(tmp.allNodes)
+
+    
+
+    def get_Sister(self):
+        '''
+        Only work if you have a parent
+        '''
+
+        tmp=Node(self.parent) #to find your sister, you must know your parents children
+
+        for x in tmp.children:
+            if self.node == x: #the sister(s) will be the children of the parent that are not itself
+                pass
+            else:
+                self.sister.append(x) 
+
+
+
+    def generateNode(self):
+        '''
+        Generate node objects from daughters
+        '''
+
+        if len(self.children) != None:
+
+            nodeList=[]
+
+            for x in self.children:
+
+                nodeList.append(Node(x,self.node))
+
+            return nodeList
+
+
+
+
+    def get_tip_features(self):
+        '''
+        Main purpose is to isolate features of the tip (species name, branch length)
+        Specifically for the tip
+        '''
+
+        if self.children != None:
+            return "This is for tips ONLY!"
+
+        else:
+
+            tmp=self.node.split(':')
+            tipName=tmp[0]
+            tipBL=tmp[1]
+
+            self.branchLength=tipBL
+
+
+            if "_" in tipName:
+                tipName=tipName.split("_")
+                final=" ".join(tipName[:2])
+                self.taxaName=final
+            else:
+                self.taxaName=tipName
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+
+
+#a=Node(tree)
+#print(a.node)
+#print(a.nodeInfo())
 #print(a.node)
 
-a.get_children()
-a.get_tips()
-a.get_allNodes()
+#a.get_children()
+#a.get_tips()
+#a.get_allNodes()
 #print(a.IntLabel)
 #print(a.children)
-print(len(a.allTips))
+#print(a.allTips)
 
-for x in a.allTips:
-    x=x.split(":")
-    x=x[0].split("_")
-    print(x[0],x[1],x[-1])
+# for x in a.allTips:
+#     x=x.split(":")
+#     x=x[0].split("_")
+#     print(x[0],x[1],x[-1])
 #print(a.allNodes)
+
+
+
+
+
 
