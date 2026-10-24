@@ -2,8 +2,8 @@
 Shawn Arreguin
 3/19/26
 
-Trying to figure out how to store the information in the tree
-God, I wish I would just comment my fucking code.
+Last updated: 10/24/26
+Next update needed: create a main statement
 
 '''
 
@@ -60,6 +60,8 @@ def travel(tree):
 #print(travel(tree))
 
 class Node:
+
+    nDict={}
     
 
 
@@ -70,12 +72,13 @@ class Node:
 
         self.children=None
         self.allTips=[]
-        self.intLabel="" #I don't really know what is going on with this, but I think this is going to store internal label info, e.g., BS and BL
+        self.intLabel="" #store internal label (node info, e.g., BS or BL)
         self.allNodes=[]
 
         self.sister=[]
         self.taxaName=None
         self.branchLength=None
+        self.newName=[]
 
 
         try:
@@ -95,7 +98,7 @@ class Node:
         '''
 
         
-        if len(self.children) != None:
+        if self.children != None:
 
             for x in self.children:
 
@@ -117,7 +120,7 @@ class Node:
         Conceptually, this is the same as get_tips, but you appending at a different point.
         '''
 
-        if len(self.children) != None:
+        if self.children != None:
 
             for x in self.children:
 
@@ -154,7 +157,7 @@ class Node:
         Generate node objects from daughters
         '''
 
-        if len(self.children) != None:
+        if self.children != None:
 
             nodeList=[]
 
@@ -185,7 +188,9 @@ class Node:
             self.branchLength=tipBL
 
 
-            if "_" in tipName:
+            if tipName[-1]=="W": #This is pretty specific to my current project and would need to change for other shit.
+                self.taxaName=tipName
+            elif "_" in tipName:
                 tipName=tipName.split("_")
                 final=" ".join(tipName[:2])
                 self.taxaName=final
@@ -194,7 +199,53 @@ class Node:
 
 
 
+    def change_Tip_Names(self):
 
+        '''
+        Change tip names to just species name and add a number to them if there are duplicates. Handy for gene trees.
+        Conceptually pretty similar to the get_tips() function
+        '''
+        
+        if self.children != None:
+            
+            
+            for x in self.children:
+
+                
+
+                tmp=Node(x)
+
+                
+                if tmp.children == None:
+                    tmp.get_tip_features()
+
+
+                    ch=tmp.taxaName
+
+                    if ch in self.nDict:
+                        self.nDict[ch]+=1
+                        ch=ch+str(self.nDict[ch])
+                    else:
+                        self.nDict[ch]=1
+
+                    ch=ch+":"+tmp.branchLength
+
+                    tmp.node=ch
+                    self.newName.append(tmp.node)
+                    #print("Self after if",self.node)
+
+
+                else:
+                    tmp.change_Tip_Names() #at this point, self now becomes tmp.
+                    tmp.intLabel=")"+tmp.intLabel
+                    tmp.newName[0]="("+tmp.newName[0]
+                    tmp.newName[-1]=tmp.newName[-1]+tmp.intLabel #with this plus the last two lines, I am creating the new node name
+                    self.newName.extend(tmp.newName) # adding the new node name created above
+                    
+                    #print(self.newName)
+                    #print("Self after else",self.node)
+
+            
 
 
         
